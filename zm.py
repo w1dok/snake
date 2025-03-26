@@ -9,7 +9,7 @@ class SnakeGame:
         self.canvas.pack()
         self.snake = [(20, 20), (20, 30), (20, 40)]
         self.food = self.create_food()
-        self.direction = "Down"
+        self.direction = "Down"  # Направление движения змейки
         self.running = True
         self.paused = False  # Флаг для паузы
         self.speed = 200  # Скорость змейки (мс)
