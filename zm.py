@@ -28,7 +28,10 @@ class SnakeGame:
             self.direction = event.keysym
 
     def move_snake(self):
+        # Получаем координаты головы змейки (последний элемент списка self.snake)
         head_x, head_y = self.snake[-1]
+
+        # Определяем новые координаты головы в зависимости от текущего направления
         if self.direction == "Up":
             new_head = (head_x, head_y - 20)
         elif self.direction == "Down":
@@ -39,19 +42,26 @@ class SnakeGame:
             new_head = (head_x + 20, head_y)
         
         # Логика для прохождения сквозь края
+        # Если координаты выходят за пределы (400x400), используем модуль (%)
+        # Это позволяет змейке появляться с противоположной стороны
         new_head = (
             new_head[0] % 400,  # Если выходит за границу по X, появляется с противоположной стороны
             new_head[1] % 400   # Если выходит за границу по Y, появляется с противоположной стороны
         )
         
-        if new_head in self.snake:  # Проверка на столкновение с собой
-            self.running = False
-            return
+        # Проверяем, не столкнулась ли змейка с самой собой
+        if new_head in self.snake:  # Если новая голова совпадает с любой частью тела
+            self.running = False  # Останавливаем игру
+            return  # Выходим из метода
         
+        # Добавляем новую голову в список змейки
         self.snake.append(new_head)
-        if new_head == self.food:
-            self.food = self.create_food()
+
+        # Проверяем, съела ли змейка еду
+        if new_head == self.food: # Если координаты головы совпадают с координатами еды
+            self.food = self.create_food() # Создаем новую еду в случайном месте
         else:
+            # Если еда не съедена, удаляем последний сегмент змейки (хвост)
             self.snake.pop(0)
 
     def update(self):
