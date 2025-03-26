@@ -5,14 +5,14 @@ class SnakeGame:
     def __init__(self, root):
         self.root = root
         self.root.title("Snake Game")
-        self.canvas = tk.Canvas(root, width=600, height=600, bg="black")
+        self.canvas = tk.Canvas(root, width=400, height=400, bg="black")
         self.canvas.pack()
         self.snake = [(20, 20), (20, 30), (20, 40)]
         self.food = self.create_food()
         self.direction = "Down"  # Направление движения змейки
         self.running = True
         self.paused = False  # Флаг для паузы
-        self.speed = 200  # Скорость змейки (мс)
+        self.speed = 250  # Скорость змейки (мс)
         self.root.bind("<KeyPress>", self.change_direction)
         self.update()
 
@@ -38,7 +38,7 @@ class SnakeGame:
         elif self.direction == "Right":
             new_head = (head_x + 20, head_y)
         
-        if new_head in self.snake or not (0 <= new_head[0] < 600 and 0 <= new_head[1] < 600):
+        if new_head in self.snake or not (0 <= new_head[0] < 400 and 0 <= new_head[1] < 400):
             self.running = False
             return
         
