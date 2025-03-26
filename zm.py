@@ -38,7 +38,13 @@ class SnakeGame:
         elif self.direction == "Right":
             new_head = (head_x + 20, head_y)
         
-        if new_head in self.snake or not (0 <= new_head[0] < 400 and 0 <= new_head[1] < 400):
+        # Логика для прохождения сквозь края
+        new_head = (
+            new_head[0] % 400,  # Если выходит за границу по X, появляется с противоположной стороны
+            new_head[1] % 400   # Если выходит за границу по Y, появляется с противоположной стороны
+        )
+        
+        if new_head in self.snake:  # Проверка на столкновение с собой
             self.running = False
             return
         
