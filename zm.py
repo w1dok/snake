@@ -5,8 +5,17 @@ class SnakeGame:
     def __init__(self, root):
         self.root = root
         self.root.title("Snake Game")
+
+        # Создаем холст для игры
         self.canvas = tk.Canvas(root, width=400, height=400, bg="black")
         self.canvas.pack()
+
+        # Создаем регулятор скорости
+        self.speed_scale = tk.Scale(root, from_=1, to=300, orient="horizontal", label="Speed", command=self.update_speed)
+        self.speed_scale.set(50)  # Устанавливаем начальную скорость
+        self.speed_scale.pack()
+
+        # Инициализация игры
         self.snake = [(20, 20), (20, 30), (20, 40)]
         self.food = self.create_food(3)  # Создаем 3 еды на старте
         self.direction = "Down"  # Направление движения змейки
@@ -65,11 +74,6 @@ class SnakeGame:
             new_head[1] % 400   # Если выходит за границу по Y, появляется с противоположной стороны
         )
         
-        # Проверяем, не столкнулась ли змейка с самой собой
-        if new_head in self.snake:  # Если новая голова совпадает с любой частью тела
-            self.running = False  # Останавливаем игру
-            return  # Выходим из метода
-        
         # Добавляем новую голову в список змейки
         self.snake.append(new_head)
 
@@ -104,12 +108,15 @@ class SnakeGame:
 
     def restart_game(self, event):
         # Перезапускаем игру
-        if not self.running:  # Если игра окончена
+        if self.running and self.paused:
             self.snake = [(20, 20), (20, 30), (20, 40)]  # Сбрасываем змейку
             self.food = self.create_food(3)  # Создаем новую еду
             self.direction = "Down"  # Сбрасываем направление
             self.running = True  # Включаем игру
             self.paused = False  # Снимаем паузу
+
+    def update_speed(self, value):
+        self.speed = int(value)
 
 if __name__ == "__main__":
     root = tk.Tk()
