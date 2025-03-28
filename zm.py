@@ -15,7 +15,6 @@ class SnakeGame:
         self.speed = 100  # Скорость змейки (мс)
         self.root.bind("<KeyPress>", self.change_direction)
         self.root.bind("<Return>", self.restart_game)  # Привязываем клавишу Enter для перезапуска
-        self.schedule_random_turn()  # Запускаем таймер для случайного поворота
         self.update()
 
     def create_food(self, count=1):
@@ -33,24 +32,22 @@ class SnakeGame:
         elif not self.paused and event.keysym in ["Up", "Down", "Left", "Right"]:
             self.direction = event.keysym
 
-    def random_turn(self):
-        # Случайно выбираем новое направление, отличное от текущего и не противоположное
-        directions = {
-            "Up": ["Left", "Right"],
-            "Down": ["Left", "Right"],
-            "Left": ["Up", "Down"],
-            "Right": ["Up", "Down"]
-        }
-        self.direction = random.choice(directions[self.direction])
-
-    def schedule_random_turn(self):
-        if self.running and not self.paused:
-            self.random_turn()
-        self.root.after(3000, self.schedule_random_turn)  # Повторяем каждые 5 секунд
-
     def move_snake(self):
         # Получаем координаты головы змейки (последний элемент списка self.snake)
         head_x, head_y = self.snake[-1]
+
+        # Если есть еда, выбираем ближайшую
+        if self.food:
+            target_x, target_y = self.food[0]  # Берем первую еду из списка
+            # Логика движения к еде
+            if head_x < target_x:
+                self.direction = "Right"
+            elif head_x > target_x:
+                self.direction = "Left"
+            elif head_y < target_y:
+                self.direction = "Down"
+            elif head_y > target_y:
+                self.direction = "Up"
 
         # Определяем новые координаты головы в зависимости от текущего направления
         if self.direction == "Up":
@@ -63,8 +60,6 @@ class SnakeGame:
             new_head = (head_x + 20, head_y)
         
         # Логика для прохождения сквозь края
-        # Если координаты выходят за пределы (400x400), используем модуль (%)
-        # Это позволяет змейке появляться с противоположной стороны
         new_head = (
             new_head[0] % 400,  # Если выходит за границу по X, появляется с противоположной стороны
             new_head[1] % 400   # Если выходит за границу по Y, появляется с противоположной стороны
