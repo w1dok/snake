@@ -25,7 +25,8 @@ cactus_image = pygame.transform.scale(cactus_image, (50, 50))  # Масштаб�
 
 # Динозавр
 dino_width, dino_height = 50, 50
-dino_x, dino_y = 50, HEIGHT - dino_height - 20
+dino_x = WIDTH // 4  # Смещаем динозавра ближе к центру по оси X (1/4 ширины экрана)
+dino_y = HEIGHT - dino_height - 20  # Смещаем динозавра вверх (на n пикселей выше земли)
 dino_velocity = 0
 gravity = 1
 is_jumping = False
@@ -43,6 +44,9 @@ font = pygame.font.Font(None, 36)
 # Флаг паузы
 paused = False
 
+# Добавляем флаг для отслеживания прыжка
+jump_triggered = False
+
 # Основной игровой цикл
 running = True
 while running:
@@ -56,10 +60,6 @@ while running:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_p:  # Кнопка паузы
                 paused = not paused  # Переключаем состояние паузы
-            if not paused and not is_jumping:
-                if event.key == pygame.K_SPACE or event.key == pygame.K_UP:
-                    is_jumping = True
-                    dino_velocity = -15
 
     if paused:
         # Отображение текста "PAUSED"
@@ -68,6 +68,24 @@ while running:
         pygame.display.flip()
         clock.tick(FPS)
         continue  # Пропускаем обновление игры, если пауза включена
+
+   # Автоматический прыжок
+    if not is_jumping and not jump_triggered and cactus_x - dino_x < 70:  # Если кактус близко
+        is_jumping = True
+        jump_triggered = True  # Устанавливаем флаг, чтобы предотвратить повторный прыжок
+        dino_velocity = -20
+
+    # Движение динозавра
+    if is_jumping:
+        dino_y += dino_velocity
+        dino_velocity += gravity
+        if dino_y >= HEIGHT - dino_height - 20:
+            dino_y = HEIGHT - dino_height - 20
+            is_jumping = False
+
+    # Сбрасываем флаг, если кактус прошел динозавра
+    if cactus_x - dino_x >= 70:
+        jump_triggered = False
 
     # Движение динозавра
     if is_jumping:
