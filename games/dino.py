@@ -11,12 +11,17 @@ pygame.display.set_caption("Dino Game")
 
 # Цвета
 WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
 GROUND_COLOR = (200, 200, 200)
 
 # FPS
 clock = pygame.time.Clock()
 FPS = 30
+
+# Загрузка изображений
+dino_image = pygame.image.load("dino.png")
+dino_image = pygame.transform.scale(dino_image, (50, 50))  # Масштабируем изображение динозавра
+cactus_image = pygame.image.load("cactus.png")
+cactus_image = pygame.transform.scale(cactus_image, (50, 50))  # Масштабируем изображение кактуса
 
 # Динозавр
 dino_width, dino_height = 50, 50
@@ -29,11 +34,14 @@ is_jumping = False
 cactus_width, cactus_height = 20, 50
 cactus_x = WIDTH
 cactus_y = HEIGHT - cactus_height - 20
-cactus_speed = 10
+cactus_speed = 5
 
 # Счет
 score = 0
 font = pygame.font.Font(None, 36)
+
+# Флаг паузы
+paused = False
 
 # Основной игровой цикл
 running = True
@@ -45,10 +53,21 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        if event.type == pygame.KEYDOWN and not is_jumping:
-            if event.key == pygame.K_SPACE or event.key == pygame.K_UP:
-                is_jumping = True
-                dino_velocity = -15
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_p:  # Кнопка паузы
+                paused = not paused  # Переключаем состояние паузы
+            if not paused and not is_jumping:
+                if event.key == pygame.K_SPACE or event.key == pygame.K_UP:
+                    is_jumping = True
+                    dino_velocity = -15
+
+    if paused:
+        # Отображение текста "PAUSED"
+        pause_text = font.render("PAUSED", True, (255, 0, 0))
+        screen.blit(pause_text, (WIDTH // 2 - 50, HEIGHT // 2 - 20))
+        pygame.display.flip()
+        clock.tick(FPS)
+        continue  # Пропускаем обновление игры, если пауза включена
 
     # Движение динозавра
     if is_jumping:
@@ -70,12 +89,12 @@ while running:
         running = False
 
     # Отрисовка динозавра и кактуса
-    pygame.draw.rect(screen, BLACK, (dino_x, dino_y, dino_width, dino_height))  # Динозавр
-    pygame.draw.rect(screen, BLACK, (cactus_x, cactus_y, cactus_width, cactus_height))  # Кактус
+    screen.blit(dino_image, (dino_x, dino_y))  # Отображение динозавра
+    screen.blit(cactus_image, (cactus_x, cactus_y))  # Отображение кактуса
 
     # Отображение счета
-    score_text = font.render(f"Score: {score}", True, BLACK)
-    screen.blit(score_text, (10, 10))
+    score_text = font.render(f"Score: {score}", True, (0, 0, 0))
+    screen.blit(score_text, (10, 10)) 
 
     # Обновление экрана
     pygame.display.flip()
