@@ -55,6 +55,9 @@ paused = False
 # Добавляем флаг для отслеживания прыжка
 jump_triggered = False
 
+# Инициализация шрифта для мелкого текста
+small_font = pygame.font.Font(None, 20)  # Размер шрифта 20
+
 # Основной игровой цикл
 running = True
 while running:
@@ -111,6 +114,11 @@ while running:
 
     # Отрисовка динозавра и кактусов
     screen.blit(dino_image, (dino_x, dino_y))  # Отображение динозавра
+
+    # Отображение высоты динозавра
+    height_text = small_font.render(f"{HEIGHT - dino_y - dino_height}", True, (0, 0, 0))  # Высота от земли
+    screen.blit(height_text, (dino_x + dino_width + 10, dino_y))  # Отображение текста справа от динозавра
+
     for cactus in cacti:
         screen.blit(cactus_image, (cactus["x"], cactus["y"]))  # Отображение кактусов
 
