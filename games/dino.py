@@ -36,7 +36,7 @@ is_jumping = False
 
 # Кактусы
 cactus_width, cactus_height = 20, 50
-cactus_speed = 5
+cactus_speed = 5 # Скорость движения кактусов
 cacti = []  # Список для хранения кактусов
 
 # Инициализация кактусов
@@ -66,24 +66,21 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_p:  # Кнопка паузы
+            if event.key == pygame.K_SPACE:  # Кнопка паузы
                 paused = not paused  # Переключаем состояние паузы
 
     if paused:
         # Отображение текста "PAUSED"
-        pause_text = font.render("PAUSED", True, (255, 0, 0))
-        screen.blit(pause_text, (WIDTH // 2 - 50, HEIGHT // 2 - 20))
-        pygame.display.flip()
         clock.tick(FPS)
         continue  # Пропускаем обновление игры, если пауза включена
 
     # Автоматический прыжок
     if not is_jumping and not jump_triggered:
         for cactus in cacti:
-            if 0 < cactus["x"] - dino_x < 70:  # Если кактус близко
+            if 0 < cactus["x"] - dino_x < 100:  # Если кактус близко 
                 is_jumping = True
                 jump_triggered = True  # Устанавливаем флаг, чтобы предотвратить повторный прыжок
-                dino_velocity = -20
+                dino_velocity = -15  # Начальная скорость прыжка
                 break
 
     # Движение динозавра
@@ -116,6 +113,14 @@ while running:
     screen.blit(dino_image, (dino_x, dino_y))  # Отображение динозавра
     for cactus in cacti:
         screen.blit(cactus_image, (cactus["x"], cactus["y"]))  # Отображение кактусов
+
+    # Отображение оси Y с координатами
+    small_font = pygame.font.Font(None, 20)  # Уменьшаем размер шрифта для координат
+    for x in range(0, WIDTH, 10):  # Шаг отметок - 10 пикселей
+        pygame.draw.line(screen, (0, 0, 0), (x, HEIGHT - 2), (x, HEIGHT - 10), 1)  # Вертикальные отметки
+        if x % 50 == 0:  # Отображаем текст только для отметок, кратных 50
+            coord_text = small_font.render(str(x), True, (0, 0, 0))  # Текст координаты
+            screen.blit(coord_text, (x + 2, HEIGHT - 30))  # Отображение текста чуть выше отметки
 
     # Отображение счета
     score_text = font.render(f"Score: {score}", True, (0, 0, 0))
