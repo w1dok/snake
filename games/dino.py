@@ -7,6 +7,9 @@ pygame.init()
 # Добавляем начальное время
 start_time = pygame.time.get_ticks()
 
+# Изначальное количество энергии
+energy = 10000  
+
 # Параметры окна
 WIDTH, HEIGHT = 1200, 400
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -34,6 +37,9 @@ dino_velocity = 0
 gravity = 1
 is_jumping = False
 
+# Максимальная высота прыжка
+max_jump_height = HEIGHT - dino_y - dino_height  # Изначально равна текущей высоте динозавра
+
 # Кактусы
 cactus_width, cactus_height = 20, 50
 cactus_speed = 5 # Скорость движения кактусов
@@ -58,6 +64,17 @@ jump_triggered = False
 # Инициализация шрифта для мелкого текста
 small_font = pygame.font.Font(None, 20)  # Размер шрифта 20
 
+def reset_game():
+    global dino_y, dino_velocity, is_jumping, jump_triggered, max_jump_height, energy, score, cacti
+    dino_y = HEIGHT - dino_height - 20
+    dino_velocity = 0
+    is_jumping = False
+    jump_triggered = False
+    max_jump_height = 0
+    energy = 10000
+    score = 0
+    cacti = [{"x": WIDTH + i * 300, "y": HEIGHT - cactus_height - 20} for i in range(5)]
+
 # Основной игровой цикл
 running = True
 while running:
@@ -69,6 +86,8 @@ while running:
         if event.type == pygame.QUIT:
             running = False
         if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_RETURN:  # Кнопка Enter для перезапуска игры
+                reset_game()
             if event.key == pygame.K_SPACE:  # Кнопка паузы
                 paused = not paused  # Переключаем состояние паузы
 
@@ -80,19 +99,27 @@ while running:
     # Автоматический прыжок
     if not is_jumping and not jump_triggered:
         for cactus in cacti:
-            if 0 < cactus["x"] - dino_x < 100:  # Если кактус близко 
+            if 0 < cactus["x"] - dino_x < 100:  # Если кактус близко
                 is_jumping = True
                 jump_triggered = True  # Устанавливаем флаг, чтобы предотвратить повторный прыжок
                 dino_velocity = -15  # Начальная скорость прыжка
+                jump_height = HEIGHT - dino_y - dino_height  # Высота прыжка
+                energy -= jump_height  # Уменьшаем энергию на высоту прыжка
                 break
 
     # Движение динозавра
     if is_jumping:
         dino_y += dino_velocity
         dino_velocity += gravity
-        if dino_y >= HEIGHT - dino_height - 20:
+        current_height = HEIGHT - dino_y - dino_height  # Текущая высота динозавра
+        if current_height > max_jump_height:
+            max_jump_height = current_height  # Обновляем максимальную высоту
+        if dino_y >= HEIGHT - dino_height - 20:  # Если динозавр достиг земли
             dino_y = HEIGHT - dino_height - 20
             is_jumping = False
+            jump_height = max_jump_height  # Высота прыжка равна максимальной высоте
+            energy -= jump_height  # Уменьшаем энергию на высоту прыжка
+            max_jump_height = 0  # Сбрасываем максимальную высоту для следующего прыжка
 
     # Сбрасываем флаг для каждого кактуса, если он прошел динозавра
     for cactus in cacti:
@@ -110,7 +137,7 @@ while running:
     for cactus in cacti:
         if dino_x < cactus["x"] + cactus_width and dino_x + dino_width > cactus["x"] and dino_y + dino_height > cactus["y"]:
             print("Game Over!")
-            running = False
+            reset_game()
 
     # Отрисовка динозавра и кактусов
     screen.blit(dino_image, (dino_x, dino_y))  # Отображение динозавра
@@ -139,12 +166,16 @@ while running:
 
     # Отображение счета
     score_text = font.render(f"Score: {score}", True, (0, 0, 0))
-    screen.blit(score_text, (WIDTH - 150, 10))  # Перемещаем счет в правый верхний угол
+    screen.blit(score_text, (WIDTH - 200, 10))  # Перемещаем счет в правый верхний угол
 
     # Расчет времени
     elapsed_time = (pygame.time.get_ticks() - start_time) // 1000  # Время в секундах
     timer_text = font.render(f"Time: {elapsed_time}s", True, (0, 0, 0))
-    screen.blit(timer_text, (WIDTH - 150, 40))  # Перемещаем таймер в правый верхний угол
+    screen.blit(timer_text, (WIDTH - 200, 40))  # Перемещаем таймер в правый верхний угол
+
+    # Отображение энергии
+    energy_text = font.render(f"Energy: {energy}", True, (0, 0, 0))
+    screen.blit(energy_text, (WIDTH - 200, 70))  # Отображение энергии под таймером
 
     # Обновление экрана
     pygame.display.flip()
