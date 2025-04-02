@@ -4,8 +4,11 @@ import random
 # Инициализация Pygame
 pygame.init()
 
+# Добавляем начальное время
+start_time = pygame.time.get_ticks()
+
 # Параметры окна
-WIDTH, HEIGHT = 800, 400
+WIDTH, HEIGHT = 1200, 400
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Dino Game")
 
@@ -113,6 +116,11 @@ while running:
     # Отображение счета
     score_text = font.render(f"Score: {score}", True, (0, 0, 0))
     screen.blit(score_text, (10, 10)) 
+
+    # Расчет времени
+    elapsed_time = (pygame.time.get_ticks() - start_time) // 1000  # Время в секундах
+    timer_text = font.render(f"Time: {elapsed_time}s", True, (0, 0, 0))
+    screen.blit(timer_text, (10, 40))  # Отображение таймера под счетом
 
     # Обновление экрана
     pygame.display.flip()
