@@ -122,14 +122,21 @@ while running:
             coord_text = small_font.render(str(x), True, (0, 0, 0))  # Текст координаты
             screen.blit(coord_text, (x + 2, HEIGHT - 30))  # Отображение текста чуть выше отметки
 
+    # Отображение оси X с координатами
+    for y in range(0, HEIGHT, 20):  # Шаг отметок - 20 пикселей
+        pygame.draw.line(screen, (0, 0, 0), (0, HEIGHT - y), (10, HEIGHT - y), 1)  # Горизонтальные отметки
+        if y % 50 == 0:  # Отображаем текст только для отметок, кратных 50
+            coord_text = small_font.render(str(y), True, (0, 0, 0))  # Текст координаты
+            screen.blit(coord_text, (15, HEIGHT - y - 10))  # Отображение текста справа от отметки
+
     # Отображение счета
     score_text = font.render(f"Score: {score}", True, (0, 0, 0))
-    screen.blit(score_text, (10, 10)) 
+    screen.blit(score_text, (WIDTH - 150, 10))  # Перемещаем счет в правый верхний угол
 
     # Расчет времени
     elapsed_time = (pygame.time.get_ticks() - start_time) // 1000  # Время в секундах
     timer_text = font.render(f"Time: {elapsed_time}s", True, (0, 0, 0))
-    screen.blit(timer_text, (10, 40))  # Отображение таймера под счетом
+    screen.blit(timer_text, (WIDTH - 150, 40))  # Перемещаем таймер в правый верхний угол
 
     # Обновление экрана
     pygame.display.flip()
