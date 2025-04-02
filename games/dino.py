@@ -36,9 +36,14 @@ is_jumping = False
 
 # Кактусы
 cactus_width, cactus_height = 20, 50
-cactus_x = WIDTH
-cactus_y = HEIGHT - cactus_height - 20
 cactus_speed = 5
+cacti = []  # Список для хранения кактусов
+
+# Инициализация кактусов
+for i in range(5):  # Добавляем  кактусов
+    cactus_x = WIDTH + i * 300  # Расстояние между кактусами
+    cactus_y = HEIGHT - cactus_height - 20
+    cacti.append({"x": cactus_x, "y": cactus_y})
 
 # Счет
 score = 0
@@ -72,11 +77,14 @@ while running:
         clock.tick(FPS)
         continue  # Пропускаем обновление игры, если пауза включена
 
-   # Автоматический прыжок
-    if not is_jumping and not jump_triggered and cactus_x - dino_x < 70:  # Если кактус близко
-        is_jumping = True
-        jump_triggered = True  # Устанавливаем флаг, чтобы предотвратить повторный прыжок
-        dino_velocity = -20
+    # Автоматический прыжок
+    if not is_jumping and not jump_triggered:
+        for cactus in cacti:
+            if 0 < cactus["x"] - dino_x < 70:  # Если кактус близко
+                is_jumping = True
+                jump_triggered = True  # Устанавливаем флаг, чтобы предотвратить повторный прыжок
+                dino_velocity = -20
+                break
 
     # Движение динозавра
     if is_jumping:
@@ -86,32 +94,28 @@ while running:
             dino_y = HEIGHT - dino_height - 20
             is_jumping = False
 
-    # Сбрасываем флаг, если кактус прошел динозавра
-    if cactus_x - dino_x >= 70:
-        jump_triggered = False
+    # Сбрасываем флаг для каждого кактуса, если он прошел динозавра
+    for cactus in cacti:
+        if cactus["x"] - dino_x >= 70:
+            jump_triggered = False
 
-    # Движение динозавра
-    if is_jumping:
-        dino_y += dino_velocity
-        dino_velocity += gravity
-        if dino_y >= HEIGHT - dino_height - 20:
-            dino_y = HEIGHT - dino_height - 20
-            is_jumping = False
+    # Движение кактусов
+    for cactus in cacti:
+        cactus["x"] -= cactus_speed
+        if cactus["x"] < -cactus_width:
+            cactus["x"] = WIDTH
+            score += 1  # Увеличиваем счет
 
-    # Движение кактуса
-    cactus_x -= cactus_speed
-    if cactus_x < -cactus_width:
-        cactus_x = WIDTH
-        score += 1  # Увеличиваем счет
+    # Проверка столкновений
+    for cactus in cacti:
+        if dino_x < cactus["x"] + cactus_width and dino_x + dino_width > cactus["x"] and dino_y + dino_height > cactus["y"]:
+            print("Game Over!")
+            running = False
 
-    # Проверка столкновения
-    if dino_x < cactus_x + cactus_width and dino_x + dino_width > cactus_x and dino_y + dino_height > cactus_y:
-        print("Game Over!")
-        running = False
-
-    # Отрисовка динозавра и кактуса
+    # Отрисовка динозавра и кактусов
     screen.blit(dino_image, (dino_x, dino_y))  # Отображение динозавра
-    screen.blit(cactus_image, (cactus_x, cactus_y))  # Отображение кактуса
+    for cactus in cacti:
+        screen.blit(cactus_image, (cactus["x"], cactus["y"]))  # Отображение кактусов
 
     # Отображение счета
     score_text = font.render(f"Score: {score}", True, (0, 0, 0))
