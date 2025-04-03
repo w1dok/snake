@@ -41,6 +41,9 @@ is_jumping = False
 max_jump_height = HEIGHT - dino_y - dino_height  # Изначально равна текущей высоте динозавра
 highest_jump = 0  # Максимальная высота за всю игру
 
+# Сумма всех максимальных высот прыжков
+SumMaxHeight = 0  # Сумма всех максимальных высот прыжков
+
 # Кактусы
 cactus_width, cactus_height = 20, 50
 cactus_speed = 5 # Скорость движения кактусов
@@ -66,7 +69,7 @@ jump_triggered = False
 small_font = pygame.font.Font(None, 20)  # Размер шрифта 20
 
 def reset_game():
-    global dino_y, dino_velocity, is_jumping, jump_triggered, max_jump_height, highest_jump, energy, score, cacti, start_time
+    global dino_y, dino_velocity, is_jumping, jump_triggered, max_jump_height, highest_jump, energy, score, cacti, start_time, SumMaxHeight
     dino_y = HEIGHT - dino_height - 20
     dino_velocity = 0
     is_jumping = False
@@ -75,6 +78,7 @@ def reset_game():
     highest_jump = 0
     energy = 10000
     score = 0
+    SumMaxHeight = 0  # Сбрасываем сумму всех максимальных высот прыжков
     cacti = [{"x": WIDTH + i * 300, "y": HEIGHT - cactus_height - 20} for i in range(5)]
     start_time = pygame.time.get_ticks()  # Сбрасываем начальное время
 
@@ -100,12 +104,20 @@ while running:
 
     # Автоматический прыжок
     if not is_jumping and not jump_triggered:
+        # Подсчёт кактусов, которые находятся в пределах 100 пикселей от динозавра
+        incoming_cacti = sum(1 for cactus in cacti if 0 < cactus["x"] - dino_x < 200)
+        
+        if incoming_cacti == 1:
+            jump_height = 12  # Стандартная высота прыжка
+        elif incoming_cacti > 1:
+            jump_height = 14  # Увеличенная высота прыжка для нескольких кактусов
+        
         for cactus in cacti:
-            if 0 < cactus["x"] - dino_x < 100:  # Если кактус близко
+            distance = cactus["x"] - dino_x  # Расстояние до кактуса
+            if 0 < distance < 90:  # Если кактус находится в пределах 100 пикселей
                 is_jumping = True
                 jump_triggered = True  # Устанавливаем флаг, чтобы предотвратить повторный прыжок
-                dino_velocity = -15  # Начальная скорость прыжка
-                # jump_height = HEIGHT - dino_y - dino_height  # Высота прыжка
+                dino_velocity = -jump_height  # Высота прыжка зависит от количества кактусов
                 break
 
     # Движение динозавра
@@ -120,7 +132,9 @@ while running:
         if dino_y >= HEIGHT - dino_height - 20:  # Если динозавр достиг земли
             dino_y = HEIGHT - dino_height - 20
             is_jumping = False
-            energy -= highest_jump  # Уменьшаем энергию на максимальную высоту прыжка
+            energy -= max_jump_height  # Уменьшаем энергию на максимальную высоту прыжка
+            SumMaxHeight += max_jump_height  # Добавляем текущую максимальную высоту прыжка к сумме
+            max_jump_height = 0  # Сбрасываем максимальную высоту для следующего прыжка
 
     # Сбрасываем флаг для каждого кактуса, если он прошел динозавра
     for cactus in cacti:
@@ -167,20 +181,24 @@ while running:
 
     # Отображение счета
     score_text = font.render(f"Score: {score}", True, (0, 0, 0))
-    screen.blit(score_text, (WIDTH - 200, 10))  # Перемещаем счет в правый верхний угол
+    screen.blit(score_text, (WIDTH - 300, 10))  # Перемещаем счет в правый верхний угол
 
     # Расчет времени
     elapsed_time = (pygame.time.get_ticks() - start_time) // 1000  # Время в секундах
     timer_text = font.render(f"Time: {elapsed_time}s", True, (0, 0, 0))
-    screen.blit(timer_text, (WIDTH - 200, 40))  # Перемещаем таймер в правый верхний угол
+    screen.blit(timer_text, (WIDTH - 300, 40))  # Перемещаем таймер в правый верхний угол
 
     # Отображение энергии
     energy_text = font.render(f"Energy: {energy}", True, (0, 0, 0))
-    screen.blit(energy_text, (WIDTH - 200, 70))  # Отображение энергии под таймером
+    screen.blit(energy_text, (WIDTH - 300, 70))  # Отображение энергии под таймером
 
     # Отображение максимальной высоты
     highest_jump_text = font.render(f"Max Height: {highest_jump}", True, (0, 0, 0))
-    screen.blit(highest_jump_text, (WIDTH - 200, 100))  # Отображение под энергией
+    screen.blit(highest_jump_text, (WIDTH - 300, 100))  # Отображение под энергией
+
+    # Отображение суммы всех максимальных высот
+    sum_max_height_text = font.render(f"Sum Max Height: {SumMaxHeight}", True, (0, 0, 0))
+    screen.blit(sum_max_height_text, (WIDTH - 300, 130))  # Отображение под максимальной высотой
 
     # Обновление экрана
     pygame.display.flip()
