@@ -39,6 +39,7 @@ is_jumping = False
 
 # Максимальная высота прыжка
 max_jump_height = HEIGHT - dino_y - dino_height  # Изначально равна текущей высоте динозавра
+highest_jump = 0  # Максимальная высота за всю игру
 
 # Кактусы
 cactus_width, cactus_height = 20, 50
@@ -65,15 +66,17 @@ jump_triggered = False
 small_font = pygame.font.Font(None, 20)  # Размер шрифта 20
 
 def reset_game():
-    global dino_y, dino_velocity, is_jumping, jump_triggered, max_jump_height, energy, score, cacti
+    global dino_y, dino_velocity, is_jumping, jump_triggered, max_jump_height, highest_jump, energy, score, cacti, start_time
     dino_y = HEIGHT - dino_height - 20
     dino_velocity = 0
     is_jumping = False
     jump_triggered = False
     max_jump_height = 0
+    highest_jump = 0
     energy = 10000
     score = 0
     cacti = [{"x": WIDTH + i * 300, "y": HEIGHT - cactus_height - 20} for i in range(5)]
+    start_time = pygame.time.get_ticks()  # Сбрасываем начальное время
 
 # Основной игровой цикл
 running = True
@@ -92,7 +95,6 @@ while running:
                 paused = not paused  # Переключаем состояние паузы
 
     if paused:
-        # Отображение текста "PAUSED"
         clock.tick(FPS)
         continue  # Пропускаем обновление игры, если пауза включена
 
@@ -103,8 +105,7 @@ while running:
                 is_jumping = True
                 jump_triggered = True  # Устанавливаем флаг, чтобы предотвратить повторный прыжок
                 dino_velocity = -15  # Начальная скорость прыжка
-                jump_height = HEIGHT - dino_y - dino_height  # Высота прыжка
-                energy -= jump_height  # Уменьшаем энергию на высоту прыжка
+                # jump_height = HEIGHT - dino_y - dino_height  # Высота прыжка
                 break
 
     # Движение динозавра
@@ -113,13 +114,13 @@ while running:
         dino_velocity += gravity
         current_height = HEIGHT - dino_y - dino_height  # Текущая высота динозавра
         if current_height > max_jump_height:
-            max_jump_height = current_height  # Обновляем максимальную высоту
+            max_jump_height = current_height  # Обновляем максимальную высоту текущего прыжка
+        if current_height > highest_jump:
+            highest_jump = current_height  # Обновляем максимальную высоту за всю игру
         if dino_y >= HEIGHT - dino_height - 20:  # Если динозавр достиг земли
             dino_y = HEIGHT - dino_height - 20
             is_jumping = False
-            jump_height = max_jump_height  # Высота прыжка равна максимальной высоте
-            energy -= jump_height  # Уменьшаем энергию на высоту прыжка
-            max_jump_height = 0  # Сбрасываем максимальную высоту для следующего прыжка
+            energy -= highest_jump  # Уменьшаем энергию на максимальную высоту прыжка
 
     # Сбрасываем флаг для каждого кактуса, если он прошел динозавра
     for cactus in cacti:
@@ -176,6 +177,10 @@ while running:
     # Отображение энергии
     energy_text = font.render(f"Energy: {energy}", True, (0, 0, 0))
     screen.blit(energy_text, (WIDTH - 200, 70))  # Отображение энергии под таймером
+
+    # Отображение максимальной высоты
+    highest_jump_text = font.render(f"Max Height: {highest_jump}", True, (0, 0, 0))
+    screen.blit(highest_jump_text, (WIDTH - 200, 100))  # Отображение под энергией
 
     # Обновление экрана
     pygame.display.flip()
